@@ -1,0 +1,40 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 61133360078-qsdcerp680bkr2vevn8ucgd5c39qmfpe.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            scope:
+              - profile
+              - email
+
+          github:
+            client-id: 59235013262b2303e495
+            client-secret: f4881a5e9f22fedae8168f8af296fadf2bc199dd
+            redirect-uri: http://localhost:8080/login/oauth2/code/github
+            scope:
+              - profile
+              - email
+
+          kakao:
+            client-id: b9b02345abb4c42594b41e590e29f759
+            client-secret: OsKnBfoxplCDL2UGekhPur7Hqq0vBziy
+            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            scope: profile_nickname, profile_image, account_email
+            client-name: Kakao
+
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+      # 프론트로 리다이렉트
+      login-page: http://localhost:3000
+      redirect-uri: http://localhost:3000/login/oauth2/userinfo
