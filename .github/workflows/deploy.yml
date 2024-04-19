@@ -84,7 +84,7 @@ jobs:
 
       - name: Update Deployment image tag
         run: |
-          sed -i "s|chickennight/pants-oauth:[^[:space:]]*|chickennight/pants-be:${{ env.version }}|" ./manifest/oauth/deployment.yaml
+          sed -i "s|chickennight/pants-oauth:[^[:space:]]*|chickennight/pants-oauth:${{ env.version }}|" ./manifest/oauth/deployment.yaml
           cd manifest
           git config user.name "chickennight"
           git config user.email "john0513@naver.com"
