@@ -74,12 +74,11 @@ public class SecurityConfig {
                 .addFilterBefore(adminAccessFilter, OAuth2AuthorizationRequestRedirectFilter.class)
 
                 .authorizeHttpRequests((requests) -> requests
-//                        .requestMatchers("/", "login/oauth2/**", "/oauth2/**", "favicon.ico").permitAll()
-//                        .requestMatchers("/oauth2/authorization/**").hasAnyRole("ADMIN", "USER")
-//                        .requestMatchers("admin/**").hasRole("ADMIN")
-//                        .requestMatchers("/user").hasAnyRole("ADMIN", "USER")
-//                        .anyRequest().authenticated())
-                        .anyRequest().permitAll())
+                        .requestMatchers("/", "login/oauth2/**", "/oauth2/**", "favicon.ico").permitAll()
+                        .requestMatchers("/oauth2/authorization/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("admin/**").hasRole("ADMIN")
+                        .requestMatchers("/user").hasAnyRole("ADMIN", "USER")
+                        .anyRequest().authenticated())
 
                         .oauth2Login(oauth2 -> oauth2
                                 .loginPage(loginPage)
