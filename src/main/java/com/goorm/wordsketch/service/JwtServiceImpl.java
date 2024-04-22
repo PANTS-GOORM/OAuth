@@ -77,6 +77,15 @@ public class JwtServiceImpl implements JwtService {
                 .signWith(key).compact();
 
         response.addCookie(createCookie(accessCookie, jwt));
+
+        /*SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        String jwt = Jwts.builder().issuer(ISSUER).subject("AdminToken")
+                .claim(USERNAME_CLAIM, "WordSketch@groom.com")
+                .claim(AUTHRITIES_CLAIM, UserRole.ADMIN.getKey())
+                .issuedAt(new Date())
+                .signWith(key).compact();
+
+        response.addCookie(createCookie(accessCookie, jwt));*/
     }
 
     /**
