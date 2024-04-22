@@ -78,7 +78,6 @@ public class AdminAccessFilter extends OncePerRequestFilter {
                                 .getPayload();
                         String username = String.valueOf(claims.get(USERNAME_CLAIM));
                         String authorities = String.valueOf(claims.get(AUTHRITIES_CLAIM));
-                        System.out.println("authorities = " + authorities);
                         Authentication auth = new UsernamePasswordAuthenticationToken(username, null,
                                 AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
                         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -91,7 +90,7 @@ public class AdminAccessFilter extends OncePerRequestFilter {
                         } else {
                             user = new User().builder()
                                     .email("ddongpants@groom.com")
-                                    .socialType(UserSocialType.valueOf("ADMIN"))
+                                    .socialType(UserSocialType.ADMIN)
                                     .nickname("ADMIN")
                                     .profileImg("https://lh3.googleusercontent.com/drive-viewer/AKGpihY7VAsaACl-0bWQJBjSCYtJt_LEQ2fcKu_0BOpdwHYtsXzQyxfhZ0B9jDltD8Sz5p1-oXz_tU5m7MbTm0apgTEHhY06NPUzuME=w1920-h953-rw-v1")
                                     .role(UserRole.ADMIN)
@@ -112,13 +111,16 @@ public class AdminAccessFilter extends OncePerRequestFilter {
                         throw new RuntimeException("예상하지 못한 오류가 발생했습니다.", exception);
                     }
                 } else {
+                    System.out.println("jwt = " + jwt);
                     doFilter(request, response, filterChain);
                 }
             } catch (NullPointerException e) {
+                System.out.println("cookies = " + cookies);
                 doFilter(request, response, filterChain);
             }
 
         } else {
+            System.out.println("무슨 에러인지 모르겠음");
             doFilter(request, response, filterChain);
         }
 
