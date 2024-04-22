@@ -91,7 +91,7 @@ public class AdminAccessFilter extends OncePerRequestFilter {
                         } else {
                             user = new User().builder()
                                     .email("ddongpants@groom.com")
-                                    .socialType(UserSocialType.valueOf("ADMIN"))
+                                    .socialType(UserSocialType.ADMIN)
                                     .nickname("ADMIN")
                                     .profileImg("https://lh3.googleusercontent.com/drive-viewer/AKGpihY7VAsaACl-0bWQJBjSCYtJt_LEQ2fcKu_0BOpdwHYtsXzQyxfhZ0B9jDltD8Sz5p1-oXz_tU5m7MbTm0apgTEHhY06NPUzuME=w1920-h953-rw-v1")
                                     .role(UserRole.ADMIN)
