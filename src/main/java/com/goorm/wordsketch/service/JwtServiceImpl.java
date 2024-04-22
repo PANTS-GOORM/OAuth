@@ -1,6 +1,7 @@
 package com.goorm.wordsketch.service;
 
 import com.goorm.wordsketch.entity.User;
+import com.goorm.wordsketch.entity.UserRole;
 import com.goorm.wordsketch.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -46,6 +47,9 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.refresh.cookie}")
     private String refreshCookie;
 
+    @Value("${jwt.admin.cookie}")
+    private String adminCookie;
+
     /**
      * OAuth2 로그인이기 때문에 username은 사실상 email
      */
@@ -54,7 +58,6 @@ public class JwtServiceImpl implements JwtService {
     private final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
     private final String USERNAME_CLAIM = "username";
     private final String AUTHRITIES_CLAIM = "authorities";
-    private final String BEARER = "Bearer ";
 
     private final UserRepository userRepository;
 
@@ -112,6 +115,51 @@ public class JwtServiceImpl implements JwtService {
     }
 
     /**
+     * AdminToken 검증
+     *
+     * @param request  사용자 요청. 헤더에서 토큰을 추출하기 위해 사용
+     * @param response 응답. 예외처리를 위해 사용
+     */
+    public void validateToken(HttpServletRequest request, HttpServletResponse response) {
+        String jwt = null;
+        Cookie[] cookies = request.getCookies();
+
+        try {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(adminCookie)) {
+                    jwt = cookie.getValue();
+                }
+            }
+            if (jwt != null) {
+                try {
+                    SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+
+                    Claims claims = Jwts.parser()
+                            .verifyWith(key)
+                            .build()
+                            .parseSignedClaims(jwt)
+                            .getPayload();
+                    String username = String.valueOf(claims.get(USERNAME_CLAIM));
+                    String authorities = String.valueOf(claims.get(AUTHRITIES_CLAIM));
+                    Authentication auth = new UsernamePasswordAuthenticationToken(username, null,
+                            AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                } catch (ExpiredJwtException expiredJwtException) {
+                    validateRefreshToken(request, response);
+                } catch (SignatureException signatureException) {
+                    throw new SecurityException("토큰 서명 검증에 실패하였습니다");
+                } catch (Exception exception) {
+                    throw new RuntimeException("예상하지 못한 오류가 발생했습니다.", exception);
+                }
+            } else {
+                validateAccessToken(request, response);
+            }
+        } catch (NullPointerException e) {
+            throw new NullPointerException("관리자토큰 검증 실패: 토큰이 확인되지 않습니다.");
+        }
+    }
+
+    /**
      * AccessToken 검증
      *
      * @param request  사용자 요청. 헤더에서 토큰을 추출하기 위해 사용
@@ -123,37 +171,30 @@ public class JwtServiceImpl implements JwtService {
 
         try {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(refreshCookie)) {
+                if (cookie.getName().equals(accessCookie)) {
                     jwt = cookie.getValue();
                 }
             }
             if (jwt != null) {
-                for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals(accessCookie)) {
-                        jwt = cookie.getValue();
-                    }
-                }
-                if (jwt != null) {
-                    try {
-                        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+                try {
+                    SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
 
-                        Claims claims = Jwts.parser()
-                                .verifyWith(key)
-                                .build()
-                                .parseSignedClaims(jwt)
-                                .getPayload();
-                        String username = String.valueOf(claims.get(USERNAME_CLAIM));
-                        String authorities = String.valueOf(claims.get(AUTHRITIES_CLAIM));
-                        Authentication auth = new UsernamePasswordAuthenticationToken(username, null,
-                                AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
-                        SecurityContextHolder.getContext().setAuthentication(auth);
-                    } catch (ExpiredJwtException expiredJwtException) {
-                        validateRefreshToken(request, response);
-                    } catch (SignatureException signatureException) {
-                        throw new SecurityException("토큰 서명 검증에 실패하였습니다");
-                    } catch (Exception exception) {
-                        throw new RuntimeException("예상하지 못한 오류가 발생했습니다.", exception);
-                    }
+                    Claims claims = Jwts.parser()
+                            .verifyWith(key)
+                            .build()
+                            .parseSignedClaims(jwt)
+                            .getPayload();
+                    String username = String.valueOf(claims.get(USERNAME_CLAIM));
+                    String authorities = String.valueOf(claims.get(AUTHRITIES_CLAIM));
+                    Authentication auth = new UsernamePasswordAuthenticationToken(username, null,
+                            AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                } catch (ExpiredJwtException expiredJwtException) {
+                    validateRefreshToken(request, response);
+                } catch (SignatureException signatureException) {
+                    throw new SecurityException("토큰 서명 검증에 실패하였습니다");
+                } catch (Exception exception) {
+                    throw new RuntimeException("예상하지 못한 오류가 발생했습니다.", exception);
                 }
             }
         } catch (NullPointerException e) {

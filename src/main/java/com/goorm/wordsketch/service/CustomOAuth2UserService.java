@@ -45,7 +45,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             email = (String) hash.get("email");
         } else if (registrationId.equals("google")) {
             email = (String) response.get("email");
-        }else {
+        } else {
             throw new OAuth2AuthenticationException("허용되지 않는 인증입니다.");
         }
 
@@ -92,14 +92,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             }
         }
 
-        userRepository.save(user);;
+        userRepository.save(user);
+        ;
 
         // oAuth2User의 attributes가 불변객체라 이를 복사하고 email을 추가함.
         Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
         attributes.put("name", email);
 
         return new DefaultOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(user.getRole().toString()))
+                Collections.singleton(new SimpleGrantedAuthority(user.getRole().getKey()))
                 , attributes
                 , "name"
         );

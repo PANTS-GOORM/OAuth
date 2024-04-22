@@ -6,10 +6,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 
 import java.io.IOException;
 
@@ -25,8 +27,10 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
      * */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        jwtService.validateAccessToken(request, response);
+        jwtService.validateToken(request, response);
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("authentication = " + authentication);
         filterChain.doFilter(request, response);
     }
 
@@ -35,6 +39,8 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
      * */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
+
+
         String path = request.getServletPath();
         return path.startsWith("/login/oauth2") || path.startsWith("/oauth2") || "/".equals(path) || "/favicon.ico".equals(path) || "/Public/home/js/check.js".equals(path);
     }

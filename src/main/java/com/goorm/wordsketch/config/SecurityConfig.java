@@ -1,5 +1,6 @@
 package com.goorm.wordsketch.config;
 
+import com.goorm.wordsketch.entity.UserRole;
 import com.goorm.wordsketch.service.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -30,17 +32,22 @@ public class SecurityConfig {
 
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
 
-    private final OncePerRequestFilter oncePerRequestFilter;
+    private final OncePerRequestFilter jwtAuthenticationFilter;
+
+    private final OncePerRequestFilter adminAccessFilter;
+
     private final String loginPage;
 
     @Autowired
     public SecurityConfig(CustomOAuth2UserService customOAuth2UserService
             , AuthenticationSuccessHandler authenticationSuccessHandler
-            , @Qualifier("jwtTokenValidatorFilter") OncePerRequestFilter oncePerRequestFilter
+            , @Qualifier("jwtTokenValidatorFilter") OncePerRequestFilter jwtAuthenticationFilter
+            , @Qualifier("adminAccessFilter") OncePerRequestFilter adminAccessFilter
             , @Value("${spring.security.oauth2.login-page}") String loginPage) {
         this.customOAuth2UserService = customOAuth2UserService;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
-        this.oncePerRequestFilter = oncePerRequestFilter;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.adminAccessFilter = adminAccessFilter;
         this.loginPage = loginPage;
     }
 
@@ -63,18 +70,22 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(oncePerRequestFilter, BasicAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class)
+                .addFilterBefore(adminAccessFilter, OAuth2AuthorizationRequestRedirectFilter.class)
 
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/", "login/oauth2/**", "/oauth2/**", "favicon.ico").permitAll()
-                        .requestMatchers("/user").hasRole("User")
-                        .anyRequest().authenticated())
+//                        .requestMatchers("/", "login/oauth2/**", "/oauth2/**", "favicon.ico").permitAll()
+//                        .requestMatchers("/oauth2/authorization/**").hasAnyRole("ADMIN", "USER")
+//                        .requestMatchers("admin/**").hasRole("ADMIN")
+//                        .requestMatchers("/user").hasAnyRole("ADMIN", "USER")
+//                        .anyRequest().authenticated())
+                        .anyRequest().permitAll())
 
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage(loginPage)
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .successHandler(authenticationSuccessHandler)
-                );
+                        .oauth2Login(oauth2 -> oauth2
+                                .loginPage(loginPage)
+                                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                                .successHandler(authenticationSuccessHandler)
+                        );
         return http.build();
     }
 
