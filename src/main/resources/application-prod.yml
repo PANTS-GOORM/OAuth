@@ -58,6 +58,9 @@ jwt:
   refresh:
     expiration: 1209600000
     cookie: RefreshToken
+
+  admin:
+    cookie: AdminToken
 logging:
   level:
     org:
@@ -66,5 +69,5 @@ logging:
         type:
           descriptor:
             sql: trace
-      springframework:
-        security: TRACE
+#      springframework:
+#        security: TRACE
