@@ -17,7 +17,7 @@ spring:
   jpa:
     database: postgresql
     hibernate:
-      ddl-auto: create # 어플리케이션 실행 시, DB 테이블 자동생성 방식
+      ddl-auto: update # 어플리케이션 실행 시, DB 테이블 자동생성 방식
       # create : 애플리케이션 실행 시 테이블을 모두 제거하고 다시 생성 (drop & create)
       # create-drop : 애플리케이션 실행 시 테이블을 모두 제거하고 다시 생성하며, 애플리케이션 종료 시점에 테이블을 모두 제거 (drop & create & drop)
       # update : 애플리케이션 실행 시 변경점만 반영
