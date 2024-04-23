@@ -3,6 +3,7 @@ package com.goorm.wordsketch.config;
 import com.goorm.wordsketch.entity.UserRole;
 import com.goorm.wordsketch.service.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,7 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -38,17 +40,29 @@ public class SecurityConfig {
 
     private final String loginPage;
 
+    private final String accessCookie;
+
+    private final String refreshCookie;
+
+    private final String adminCookie;
+
     @Autowired
     public SecurityConfig(CustomOAuth2UserService customOAuth2UserService
             , AuthenticationSuccessHandler authenticationSuccessHandler
             , @Qualifier("jwtTokenValidatorFilter") OncePerRequestFilter jwtAuthenticationFilter
             , @Qualifier("adminAccessFilter") OncePerRequestFilter adminAccessFilter
-            , @Value("${spring.security.oauth2.login-page}") String loginPage) {
+            , @Value("${spring.security.oauth2.login-page}") String loginPage
+            , @Value("${jwt.access.cookie}") String accessCookie
+            , @Value("${jwt.refresh.cookie}") String refreshCookie
+            , @Value("${jwt.admin.cookie}") String adminCookie) {
         this.customOAuth2UserService = customOAuth2UserService;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.adminAccessFilter = adminAccessFilter;
         this.loginPage = loginPage;
+        this.accessCookie = accessCookie;
+        this.refreshCookie = refreshCookie;
+        this.adminCookie = adminCookie;
     }
 
     @Bean
@@ -80,11 +94,17 @@ public class SecurityConfig {
                         .requestMatchers("/user").hasAnyRole("ADMIN", "USER")
                         .anyRequest().authenticated())
 
-                        .oauth2Login(oauth2 -> oauth2
-                                .loginPage(loginPage)
-                                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                                .successHandler(authenticationSuccessHandler)
-                        );
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage(loginPage)
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .successHandler(authenticationSuccessHandler)
+                )
+
+                .logout((logout) -> logout
+                        .logoutSuccessUrl(loginPage)
+                        .invalidateHttpSession(true)
+                        .deleteCookies(accessCookie, refreshCookie, adminCookie)
+                );
         return http.build();
     }
 
