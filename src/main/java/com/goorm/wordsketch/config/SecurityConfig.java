@@ -97,7 +97,6 @@ public class SecurityConfig {
                         .addLogoutHandler(customLogoutHandler)
                         .logoutSuccessUrl(loginPage)
                         .invalidateHttpSession(true)
-                        .deleteCookies()
                 );
         return http.build();
     }
