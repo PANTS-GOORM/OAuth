@@ -80,11 +80,11 @@ public class SecurityConfig {
                         .requestMatchers("/user").hasAnyRole("ADMIN", "USER")
                         .anyRequest().authenticated())
 
-                        .oauth2Login(oauth2 -> oauth2
-                                .loginPage(loginPage)
-                                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                                .successHandler(authenticationSuccessHandler)
-                        );
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage(loginPage)
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .successHandler(authenticationSuccessHandler)
+                );
         return http.build();
     }
 
