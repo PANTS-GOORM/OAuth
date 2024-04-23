@@ -32,7 +32,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Value("${spring.security.oauth2.redirect-uri}")
     private String redirectUrl;
 
-    // Todo: 배포하면 url 변경 필요
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         if (null != authentication) {

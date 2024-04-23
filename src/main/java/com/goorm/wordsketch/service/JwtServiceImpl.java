@@ -298,7 +298,7 @@ public class JwtServiceImpl implements JwtService {
     public Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(Math.toIntExact(refreshTokenExpirationPeriod));
-        // cookie.setSecure(true);
+        cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setDomain("wordsketch.site");
