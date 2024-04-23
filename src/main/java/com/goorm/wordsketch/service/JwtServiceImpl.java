@@ -301,7 +301,7 @@ public class JwtServiceImpl implements JwtService {
         // cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setDomain(".wordsketch.site");
+        cookie.setDomain("wordsketch.site");
 
         return cookie;
     }
