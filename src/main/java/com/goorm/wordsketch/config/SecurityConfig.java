@@ -16,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
@@ -38,31 +39,23 @@ public class SecurityConfig {
 
     private final OncePerRequestFilter adminAccessFilter;
 
+    private final LogoutHandler customLogoutHandler;
+
     private final String loginPage;
-
-    private final String accessCookie;
-
-    private final String refreshCookie;
-
-    private final String adminCookie;
 
     @Autowired
     public SecurityConfig(CustomOAuth2UserService customOAuth2UserService
             , AuthenticationSuccessHandler authenticationSuccessHandler
             , @Qualifier("jwtTokenValidatorFilter") OncePerRequestFilter jwtAuthenticationFilter
             , @Qualifier("adminAccessFilter") OncePerRequestFilter adminAccessFilter
-            , @Value("${spring.security.oauth2.login-page}") String loginPage
-            , @Value("${jwt.access.cookie}") String accessCookie
-            , @Value("${jwt.refresh.cookie}") String refreshCookie
-            , @Value("${jwt.admin.cookie}") String adminCookie) {
+            , LogoutHandler customLogoutHandler
+            , @Value("${spring.security.oauth2.login-page}") String loginPage) {
         this.customOAuth2UserService = customOAuth2UserService;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.adminAccessFilter = adminAccessFilter;
+        this.customLogoutHandler = customLogoutHandler;
         this.loginPage = loginPage;
-        this.accessCookie = accessCookie;
-        this.refreshCookie = refreshCookie;
-        this.adminCookie = adminCookie;
     }
 
     @Bean
@@ -101,9 +94,10 @@ public class SecurityConfig {
                 )
 
                 .logout((logout) -> logout
+                        .addLogoutHandler(customLogoutHandler)
                         .logoutSuccessUrl(loginPage)
                         .invalidateHttpSession(true)
-                        .deleteCookies(accessCookie, refreshCookie, adminCookie)
+                        .deleteCookies()
                 );
         return http.build();
     }
