@@ -1,0 +1,13 @@
+jwt:
+  secretKey: 'gasdfasfasgfsdgsdfhgsdgsdgsdgsdgsdfgsdf13123dwg112fqfg1231fsgqegkqw[fkg[23123kk2[k'
+
+  access:
+    expiration: 3600000 # 1시간(60분) (1000L(ms -> s) * 60L(s -> m) * 60L(m -> h))
+    cookie: AccessToken
+
+  refresh:
+    expiration: 1209600000 #  (1000L(ms -> s) * 60L(s -> m) * 60L(m -> h) * 24L(h -> 하루) * 14(2주))
+    cookie: RefreshToken
+
+  admin:
+    cookie: AdminToken
